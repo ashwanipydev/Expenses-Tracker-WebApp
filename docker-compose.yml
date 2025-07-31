@@ -1,6 +1,6 @@
 version: "3.8"
 services:
-  mysql:
+  mysql_db:
     image: mysql:latest
     container_name: mysql
     environment:
@@ -9,7 +9,7 @@ services:
     volumes:
       - ./mysql-data:/var/lib/mysql
     networks:
-      - appbridge
+      - expenses-app-nw
     healthcheck:
       test: ["CMD","mysqladmin","ping","-h","localhost","-uroot","-pTest@123"]
       interval: 10s
@@ -17,9 +17,12 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+    ports:
+      - "3310:3306"
 
-  mainapp:
-    image: snehcreate/expensetracker_v3
+  java_app:
+    build:
+      context: .
     container_name: Expensetracker
     environment:
       SPRING_DATASOURCE_USERNAME: root
@@ -28,13 +31,13 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - appbridge
+      - expenses-app-nw
     depends_on:
-      - mysql
+      - mysql_db
     restart: always
 
 networks:
-  appbridge:
+  expenses-app-nw:
 
 volumes:
   mysql-data:
